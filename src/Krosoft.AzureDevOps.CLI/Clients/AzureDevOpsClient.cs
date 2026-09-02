@@ -139,6 +139,22 @@ internal sealed class AzureDevOpsClient : IAzureDevOpsClient
         await EnsureSuccessAsync(response, cancellationToken);
     }
 
+    // Builds en cours (inProgress) et en attente (notStarted).
+    public async Task<IReadOnlyList<Build>> GetActiveBuildsAsync(string project, CancellationToken cancellationToken = default)
+    {
+        var url = $"{_organizationUrl}/{Uri.EscapeDataString(project)}/_apis/build/builds" +
+                  $"?statusFilter=inProgress,notStarted&api-version={ApiVersion}";
+
+        using var response = await _httpClient.GetAsync(url, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+
+        var page = await response.Content.ReadFromJsonAsync<ListResponse<Build>>(JsonOptions, cancellationToken);
+        return page?.Value ?? [];
+    }
+
+    public string GetBuildUrl(Build build) =>
+        $"{_organizationUrl}/{Uri.EscapeDataString(build.Project.Name)}/_build/results?buildId={build.Id}";
+
     public string GetPullRequestUrl(PullRequest pullRequest) =>
         $"{_organizationUrl}/{Uri.EscapeDataString(pullRequest.Repository.Project.Name)}/_git/{Uri.EscapeDataString(pullRequest.Repository.Name)}/pullrequest/{pullRequest.Id}";
 

@@ -258,7 +258,7 @@ internal class PullRequestManager : IPullRequestManager
         var filters = profile.PullRequests ?? PullRequestFilters.Default;
         var byIds = ids is { Count: > 0 };
 
-        var projects = await ResolveProjectsAsync(client, profile.AzureDevOps);
+        var projects = await ProjectResolver.ResolveAsync(client, profile.AzureDevOps);
         DisplayFilters(projects, filters, byIds ? ids : null);
 
         var all = new List<PullRequest>();
@@ -272,23 +272,6 @@ internal class PullRequestManager : IPullRequestManager
             : PullRequestFilter.Apply(all, filters);
 
         return (projects, all, filtered);
-    }
-
-    // Projets explicitement listés dans le profil, sinon tous les projets de l'organisation.
-    private static async Task<IReadOnlyList<string>> ResolveProjectsAsync(IAzureDevOpsClient client, AzureDevOpsProfile profile)
-    {
-        var configured = (profile.Projects ?? [])
-                         .Where(p => !string.IsNullOrWhiteSpace(p))
-                         .Select(p => p.Trim())
-                         .ToList();
-
-        if (configured.Count > 0)
-        {
-            return configured;
-        }
-
-        var projects = await client.GetProjectsAsync();
-        return projects.Select(p => p.Name).ToList();
     }
 
     private static void DisplayFilters(IReadOnlyList<string> projects, PullRequestFilters filters, IReadOnlyCollection<int>? ids)

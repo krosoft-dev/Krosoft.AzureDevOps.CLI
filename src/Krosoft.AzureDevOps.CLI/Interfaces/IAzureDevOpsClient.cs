@@ -16,5 +16,9 @@ internal interface IAzureDevOpsClient : IDisposable
 
     Task RequeuePolicyEvaluationAsync(PullRequest pullRequest, Guid evaluationId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Build>> GetActiveBuildsAsync(string project, CancellationToken cancellationToken = default);
+
     string GetPullRequestUrl(PullRequest pullRequest);
+
+    string GetBuildUrl(Build build);
 }

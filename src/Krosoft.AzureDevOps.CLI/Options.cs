@@ -24,6 +24,13 @@ internal static class Options
         public IEnumerable<int> Ids { get; set; } = [];
     }
 
+    [Verb("build-list", HelpText = "Liste les builds en cours et en attente des projets du profil.")]
+    internal class BuildListOptions
+    {
+        [Option('p', "profile", Required = true, HelpText = "Chemin vers le fichier de profil JSON.")]
+        public string Profile { get; set; } = string.Empty;
+    }
+
     [Verb("pr-requeue", HelpText = "Relance les builds en échec (policies Build) des pull requests correspondant aux filtres du profil.")]
     internal class RequeueOptions
     {

@@ -36,7 +36,7 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 
 | Champ | Description |
 |-------|-------------|
-| `pat` | Personal Access Token. Scopes : `Code (Read & Write)` et `Project and Team (Read)`. |
+| `pat` | Personal Access Token. Scopes : `Code (Read & Write)`, `Project and Team (Read)` et `Build (Read)`. |
 | `projects` | Projets à parcourir. Vide = tous les projets de l'organisation. |
 | `status` | `active` (défaut), `completed`, `abandoned` ou `all`. |
 | `titles` | Titres recherchés (OU, insensible à la casse). Vide = tous. |
@@ -52,6 +52,7 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 | `pr-list` | Liste les PR correspondant au profil. |
 | `pr-approve` | Approuve les PR (les PR déjà approuvées sont ignorées). |
 | `pr-requeue` | Relance les builds en échec (équivalent du bouton *Re-queue*). Les autres policies en échec sont affichées mais pas relançables. |
+| `build-list` | Liste les builds en cours et en attente sur les projets du profil (les filtres `pullRequests` ne s'appliquent pas). |
 
 `pr-approve` et `pr-requeue` acceptent :
 
@@ -67,6 +68,7 @@ krosoft-devops pr-list --profile ./files/tenor.json
 krosoft-devops pr-approve --profile ./files/tenor.json --dry-run
 krosoft-devops pr-approve --profile ./files/tenor.json
 krosoft-devops pr-requeue --profile ./files/tenor.json --ids 6562
+krosoft-devops build-list --profile ./files/tenor.json
 ```
 
 Depuis les sources (le `--` sépare les arguments de `dotnet run` de ceux du CLI) :
@@ -76,6 +78,7 @@ dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-list --profile ./files/te
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files/tenor.json --dry-run
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files/tenor.json
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-requeue --profile ./files/tenor.json --ids 6562
+dotnet run --project src/Krosoft.AzureDevOps.CLI -- build-list --profile ./files/tenor.json
 ```
 
 Code de sortie : `0` si tout s'est bien passé, `-1` en cas d'erreur ou si au moins une action a échoué.
