@@ -1,0 +1,14 @@
+{
+  "name": "local",
+  "azureDevOps": {
+    "organizationUrl": "https://dev.azure.com/mon-organisation",
+    "pat": "secret_pat",
+    "projects": []
+  },
+  "pullRequests": {
+    "status": "active",
+    "titles": ["Renovate - Update all Krosoft.Extensions packages"],
+    "exactTitle": true,
+    "repositories": []
+  }
+}

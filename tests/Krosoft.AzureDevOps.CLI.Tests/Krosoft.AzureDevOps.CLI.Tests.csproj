@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Krosoft.AzureDevOps.CLI\Krosoft.AzureDevOps.CLI.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Krosoft.AzureDevOps.CLI": {
+      "commandName": "Project",
+      "workingDirectory": "../../",
+      "commandLineArgs": "pr-list --profile ./files/local.json"
+    }
+  }
+}

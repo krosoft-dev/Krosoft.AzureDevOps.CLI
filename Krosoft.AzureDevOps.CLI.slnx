@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Krosoft.AzureDevOps.CLI/Krosoft.AzureDevOps.CLI.csproj" />
+  <Project Path="tests/Krosoft.AzureDevOps.CLI.Tests/Krosoft.AzureDevOps.CLI.Tests.csproj" />
+</Solution>
