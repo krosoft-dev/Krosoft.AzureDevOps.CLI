@@ -8,7 +8,7 @@ internal static class ProgramPullRequests
     public static Task<int> List(Options.PullRequestsOptions opts) => GetPullRequestManager().List(opts.Profile);
 
     public static Task<int> Approve(Options.ApproveOptions opts) =>
-        GetPullRequestManager().Approve(opts.Profile, opts.DryRun, opts.Ids.ToList());
+        GetPullRequestManager().Approve(opts.Profile, opts.DryRun, opts.Complete, opts.Ids.ToList());
 
     public static Task<int> Requeue(Options.RequeueOptions opts) =>
         GetPullRequestManager().Requeue(opts.Profile, opts.DryRun, opts.Ids.ToList());

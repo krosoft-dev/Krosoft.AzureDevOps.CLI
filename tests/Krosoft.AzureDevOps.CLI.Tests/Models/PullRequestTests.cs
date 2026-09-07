@@ -50,7 +50,23 @@ public class PullRequestTests
         Check.That(pr.IsApprovedBy(Me)).IsFalse();
     }
 
-    private static PullRequest Create(List<Reviewer>? reviewers) =>
+    [TestMethod]
+    public void IsAutoCompleteSet_SansAutoCompleteSetBy_Faux()
+    {
+        var pr = Create(null);
+
+        Check.That(pr.IsAutoCompleteSet).IsFalse();
+    }
+
+    [TestMethod]
+    public void IsAutoCompleteSet_AvecAutoCompleteSetBy_Vrai()
+    {
+        var pr = Create(null, new IdentityRef("Moi"));
+
+        Check.That(pr.IsAutoCompleteSet).IsTrue();
+    }
+
+    private static PullRequest Create(List<Reviewer>? reviewers, IdentityRef? autoCompleteSetBy = null) =>
         new(1,
             "Renovate - Update all Krosoft.Extensions packages",
             "active",
@@ -60,5 +76,6 @@ public class PullRequestTests
             "refs/heads/main",
             new IdentityRef("Renovate Bot"),
             new GitRepository(Guid.NewGuid().ToString(), "Repo", new TeamProject(Guid.NewGuid().ToString(), "Proj")),
-            reviewers);
+            reviewers,
+            autoCompleteSetBy);
 }

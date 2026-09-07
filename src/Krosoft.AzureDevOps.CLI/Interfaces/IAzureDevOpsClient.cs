@@ -12,6 +12,8 @@ internal interface IAzureDevOpsClient : IDisposable
 
     Task ApproveAsync(PullRequest pullRequest, string reviewerId, CancellationToken cancellationToken = default);
 
+    Task SetAutoCompleteAsync(PullRequest pullRequest, string reviewerId, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<PolicyEvaluation>> GetPolicyEvaluationsAsync(PullRequest pullRequest, CancellationToken cancellationToken = default);
 
     Task RequeuePolicyEvaluationAsync(PullRequest pullRequest, Guid evaluationId, CancellationToken cancellationToken = default);

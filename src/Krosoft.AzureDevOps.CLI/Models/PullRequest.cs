@@ -19,8 +19,13 @@ internal record PullRequest(
     [property: JsonPropertyName("repository")]
     GitRepository Repository,
     [property: JsonPropertyName("reviewers")]
-    List<Reviewer>? Reviewers = null)
+    List<Reviewer>? Reviewers = null,
+    [property: JsonPropertyName("autoCompleteSetBy")]
+    IdentityRef? AutoCompleteSetBy = null)
 {
+    // Azure DevOps ne renvoie autoCompleteSetBy que lorsque l'auto-complétion est activée.
+    internal bool IsAutoCompleteSet => AutoCompleteSetBy is not null;
+
     internal int VoteOf(string reviewerId) =>
         Reviewers?.FirstOrDefault(r => string.Equals(r.Id, reviewerId, StringComparison.OrdinalIgnoreCase))?.Vote ?? Vote.NoVote;
 

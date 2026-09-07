@@ -37,7 +37,7 @@ internal class PullRequestManager : IPullRequestManager
         }
     }
 
-    public async Task<int> Approve(string profilePath, bool dryRun, IReadOnlyCollection<int> ids)
+    public async Task<int> Approve(string profilePath, bool dryRun, bool complete, IReadOnlyCollection<int> ids)
     {
         var (profile, error) = await ProfileLoader.LoadAsync(profilePath);
         if (profile is null)
@@ -45,9 +45,8 @@ internal class PullRequestManager : IPullRequestManager
             return ConsoleHelper.HandleError(error!);
         }
 
-        ConsoleHelper.DisplayHeader(dryRun
-                                        ? $"APPROBATION (SIMULATION) - {profile.Name}"
-                                        : $"APPROBATION - {profile.Name}");
+        var title = complete ? "APPROBATION + AUTO-COMPLETE" : "APPROBATION";
+        ConsoleHelper.DisplayHeader(dryRun ? $"{title} (SIMULATION) - {profile.Name}" : $"{title} - {profile.Name}");
 
         try
         {
@@ -71,6 +70,8 @@ internal class PullRequestManager : IPullRequestManager
             }
 
             var toApprove = pullRequests.Where(pr => !pr.IsApprovedBy(userId)).ToList();
+            List<PullRequest> toComplete = complete ? pullRequests.Where(pr => !pr.IsAutoCompleteSet).ToList() : [];
+            var actionable = pullRequests.Where(pr => !pr.IsApprovedBy(userId) || (complete && !pr.IsAutoCompleteSet)).ToList();
             var alreadyApproved = pullRequests.Count - toApprove.Count;
 
             Console.WriteLine($"{"#",-4} {"ID",-7} {"Projet",-20} {"Dépôt",-24} {"Titre",-44} {"Mon vote",-28} Action");
@@ -79,63 +80,109 @@ internal class PullRequestManager : IPullRequestManager
             var index = 1;
             foreach (var pr in pullRequests)
             {
-                var willApprove = !pr.IsApprovedBy(userId);
-                var action = willApprove
-                    ? dryRun ? "à approuver" : "approbation..."
-                    : "ignorée (déjà approuvée)";
-
                 Console.WriteLine($"{index,-4} {pr.Id,-7} {ConsoleHelper.Truncate(pr.Repository.Project.Name, 20),-20} " +
                                   $"{ConsoleHelper.Truncate(pr.Repository.Name, 24),-24} {ConsoleHelper.Truncate(pr.Title, 44),-44} " +
-                                  $"{Vote.ToLabel(pr.VoteOf(userId)),-28} {action}");
+                                  $"{Vote.ToLabel(pr.VoteOf(userId)),-28} {DescribeAction(pr, userId, complete, dryRun)}");
                 Console.WriteLine($"     {client.GetPullRequestUrl(pr)}");
                 index++;
             }
 
             Console.WriteLine(new string('─', ConsoleHelper.Width));
-            Console.WriteLine($"{pullRequests.Count} pull request(s) correspondante(s) sur {all.Count} analysée(s) dans {projects.Count} projet(s) : " +
-                              $"{toApprove.Count} à approuver, {alreadyApproved} déjà approuvée(s).");
+            var summary = $"{pullRequests.Count} pull request(s) correspondante(s) sur {all.Count} analysée(s) dans {projects.Count} projet(s) : {toApprove.Count} à approuver";
+            if (complete)
+            {
+                summary += $", {toComplete.Count} à compléter";
+            }
+
+            summary += $", {alreadyApproved} déjà approuvée(s).";
+            Console.WriteLine(summary);
             Console.WriteLine();
 
             if (dryRun)
             {
-                ConsoleHelper.WriteColoredLine(ConsoleColor.Yellow, "Mode simulation : aucune approbation effectuée. Relancer sans --dry-run pour approuver.");
+                ConsoleHelper.WriteColoredLine(ConsoleColor.Yellow, "Mode simulation : aucune modification effectuée. Relancer sans --dry-run pour appliquer.");
                 return 0;
             }
 
-            if (toApprove.Count == 0)
+            if (actionable.Count == 0)
             {
-                ConsoleHelper.WriteColoredLine(ConsoleColor.Green, "Rien à approuver.");
+                ConsoleHelper.WriteColoredLine(ConsoleColor.Green, complete ? "Rien à approuver ni à compléter." : "Rien à approuver.");
                 return 0;
             }
 
+            var approved = 0;
+            var completed = 0;
             var failures = 0;
-            foreach (var pr in toApprove)
+            foreach (var pr in actionable)
             {
-                try
+                var label = $"!{pr.Id} {pr.Repository.Project.Name}/{pr.Repository.Name}";
+
+                if (!pr.IsApprovedBy(userId))
                 {
-                    await client.ApproveAsync(pr, userId);
-                    ConsoleHelper.WriteColoredLine(ConsoleColor.Green, $"  [OK] !{pr.Id} {pr.Repository.Project.Name}/{pr.Repository.Name} approuvée");
+                    try
+                    {
+                        await client.ApproveAsync(pr, userId);
+                        approved++;
+                        ConsoleHelper.WriteColoredLine(ConsoleColor.Green, $"  [OK] {label} approuvée");
+                    }
+                    catch (Exception ex)
+                    {
+                        failures++;
+                        ConsoleHelper.WriteColoredLine(ConsoleColor.Red, $"  [KO] {label} : {ex.Message}");
+                        continue; // Approbation échouée : inutile de tenter l'auto-complétion.
+                    }
                 }
-                catch (Exception ex)
+
+                if (complete && !pr.IsAutoCompleteSet)
                 {
-                    failures++;
-                    ConsoleHelper.WriteColoredLine(ConsoleColor.Red, $"  [KO] !{pr.Id} {pr.Repository.Project.Name}/{pr.Repository.Name} : {ex.Message}");
+                    try
+                    {
+                        await client.SetAutoCompleteAsync(pr, userId);
+                        completed++;
+                        ConsoleHelper.WriteColoredLine(ConsoleColor.Green, $"  [OK] {label} auto-complétion activée");
+                    }
+                    catch (Exception ex)
+                    {
+                        failures++;
+                        ConsoleHelper.WriteColoredLine(ConsoleColor.Red, $"  [KO] {label} auto-complétion : {ex.Message}");
+                    }
                 }
             }
 
             Console.WriteLine();
             if (failures > 0)
             {
-                return ConsoleHelper.HandleError($"{toApprove.Count - failures} approuvée(s), {failures} en échec.");
+                return ConsoleHelper.HandleError(complete
+                                                     ? $"{approved} approuvée(s), {completed} en auto-complete, {failures} en échec."
+                                                     : $"{approved} approuvée(s), {failures} en échec.");
             }
 
-            ConsoleHelper.WriteColoredLine(ConsoleColor.Green, $"{toApprove.Count} pull request(s) approuvée(s).");
+            ConsoleHelper.WriteColoredLine(ConsoleColor.Green, complete
+                                               ? $"{approved} pull request(s) approuvée(s), {completed} passée(s) en auto-complete."
+                                               : $"{approved} pull request(s) approuvée(s).");
             return 0;
         }
         catch (Exception ex)
         {
             return ConsoleHelper.HandleError($"Impossible d'approuver les pull requests : {ex.Message}");
         }
+    }
+
+    // Décrit l'action prévue pour une PR dans le tableau récapitulatif (approbation et/ou auto-complétion).
+    private static string DescribeAction(PullRequest pr, string userId, bool complete, bool dryRun)
+    {
+        var parts = new List<string>();
+        if (!pr.IsApprovedBy(userId))
+        {
+            parts.Add(dryRun ? "à approuver" : "approbation...");
+        }
+
+        if (complete && !pr.IsAutoCompleteSet)
+        {
+            parts.Add(dryRun ? "à compléter" : "auto-complétion...");
+        }
+
+        return parts.Count > 0 ? string.Join(" + ", parts) : "ignorée (déjà approuvée)";
     }
 
     public async Task<int> Requeue(string profilePath, bool dryRun, IReadOnlyCollection<int> ids)

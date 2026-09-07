@@ -117,6 +117,17 @@ internal sealed class AzureDevOpsClient : IAzureDevOpsClient
         await EnsureSuccessAsync(response, cancellationToken);
     }
 
+    // Active l'auto-complétion : la PR est fusionnée automatiquement dès que les policies obligatoires sont satisfaites.
+    // Sans completionOptions, Azure applique la stratégie de merge et le comportement de branche configurés sur le dépôt.
+    public async Task SetAutoCompleteAsync(PullRequest pullRequest, string reviewerId, CancellationToken cancellationToken = default)
+    {
+        var url = $"{_organizationUrl}/{Uri.EscapeDataString(pullRequest.Repository.Project.Name)}" +
+                  $"/_apis/git/repositories/{pullRequest.Repository.Id}/pullRequests/{pullRequest.Id}?api-version={ApiVersion}";
+
+        using var response = await _httpClient.PatchAsJsonAsync(url, new { autoCompleteSetBy = new { id = reviewerId } }, JsonOptions, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<PolicyEvaluation>> GetPolicyEvaluationsAsync(PullRequest pullRequest, CancellationToken cancellationToken = default)
     {
         var artifactId = $"vstfs:///CodeReview/CodeReviewId/{pullRequest.Repository.Project.Id}/{pullRequest.Id}";

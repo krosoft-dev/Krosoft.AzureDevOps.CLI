@@ -20,6 +20,9 @@ internal static class Options
         [Option('d', "dry-run", Required = false, Default = false, HelpText = "Affiche les pull requests qui seraient approuvées, sans rien modifier.")]
         public bool DryRun { get; set; }
 
+        [Option('c', "complete", Required = false, Default = false, HelpText = "Active aussi l'auto-complétion des PR approuvées (fusion automatique dès que les policies obligatoires passent).")]
+        public bool Complete { get; set; }
+
         [Option('i', "ids", Required = false, Separator = ',', HelpText = "Limite l'approbation à ces IDs de pull request (ex: --ids 6571,6572). Remplace les filtres titre/dépôt du profil.")]
         public IEnumerable<int> Ids { get; set; } = [];
     }

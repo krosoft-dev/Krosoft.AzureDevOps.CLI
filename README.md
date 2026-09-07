@@ -50,7 +50,7 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 | Commande | Rôle |
 |----------|------|
 | `pr-list` | Liste les PR correspondant au profil. |
-| `pr-approve` | Approuve les PR (les PR déjà approuvées sont ignorées). |
+| `pr-approve` | Approuve les PR (les PR déjà approuvées sont ignorées). `--complete` active en plus l'auto-complétion. |
 | `pr-requeue` | Relance les builds en échec (équivalent du bouton *Re-queue*). Les autres policies en échec sont affichées mais pas relançables. |
 | `build-list` | Liste les builds en cours et en attente sur les projets du profil (les filtres `pullRequests` ne s'appliquent pas). |
 
@@ -61,12 +61,19 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 | `--dry-run`, `-d` | Affiche ce qui serait fait, sans rien modifier. |
 | `--ids`, `-i` | Limite aux PR indiquées (`--ids 6571,6572`). Remplace les filtres `titles`/`repositories`. |
 
+`pr-approve` accepte en plus :
+
+| Option | Description |
+|--------|-------------|
+| `--complete`, `-c` | Active l'auto-complétion des PR approuvées (bouton *Set auto-complete*). Les PR déjà en auto-complete sont ignorées. Les options de merge (stratégie, suppression de branche) restent celles configurées sur le dépôt. |
+
 Avec l'outil installé :
 
 ```bash
 krosoft-devops pr-list --profile ./files/tenor.json
 krosoft-devops pr-approve --profile ./files/tenor.json --dry-run
 krosoft-devops pr-approve --profile ./files/tenor.json
+krosoft-devops pr-approve --profile ./files/tenor.json --complete
 krosoft-devops pr-requeue --profile ./files/tenor.json --ids 6562
 krosoft-devops build-list --profile ./files/tenor.json
 ```
