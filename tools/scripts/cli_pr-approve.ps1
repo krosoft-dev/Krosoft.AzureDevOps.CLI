@@ -1,0 +1,1 @@
+dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files/tenor.json
