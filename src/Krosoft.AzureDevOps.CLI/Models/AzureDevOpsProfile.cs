@@ -7,4 +7,6 @@ internal record AzureDevOpsProfile(
     string OrganizationUrl,
     [property: JsonPropertyName("pat")] string Pat,
     [property: JsonPropertyName("projects")]
-    List<string>? Projects = null);
+    List<string>? Projects = null,
+    [property: JsonPropertyName("excludedProjects")]
+    List<string>? ExcludedProjects = null);

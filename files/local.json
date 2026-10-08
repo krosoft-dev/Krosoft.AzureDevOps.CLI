@@ -3,7 +3,8 @@
   "azureDevOps": {
     "organizationUrl": "https://dev.azure.com/mon-organisation",
     "pat": "secret_pat",
-    "projects": []
+    "projects": [],
+    "excludedProjects": []
   },
   "pullRequests": {
     "status": "active",

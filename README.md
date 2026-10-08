@@ -23,7 +23,8 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
   "azureDevOps": {
     "organizationUrl": "https://dev.azure.com/mon-organisation",
     "pat": "xxxxxxxx",
-    "projects": []
+    "projects": [],
+    "excludedProjects": []
   },
   "pullRequests": {
     "status": "active",
@@ -38,6 +39,7 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 |-------|-------------|
 | `pat` | Personal Access Token. Scopes : `Code (Read & Write)`, `Project and Team (Read)` et `Build (Read)`. |
 | `projects` | Projets à parcourir. Vide = tous les projets de l'organisation. |
+| `excludedProjects` | Projets à exclure (insensible à la casse). Appliqué que `projects` soit rempli ou vide. |
 | `status` | `active` (défaut), `completed`, `abandoned` ou `all`. |
 | `titles` | Titres recherchés (OU, insensible à la casse). Vide = tous. |
 | `exactTitle` | `true` : titre égal. `false` : titre contenant. |
