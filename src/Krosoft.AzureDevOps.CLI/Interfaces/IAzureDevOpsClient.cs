@@ -20,6 +20,10 @@ internal interface IAzureDevOpsClient : IDisposable
 
     Task<IReadOnlyList<Build>> GetActiveBuildsAsync(string project, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<GitRepository>> GetRepositoriesAsync(string project, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<PolicyConfiguration>> GetPolicyConfigurationsAsync(string project, CancellationToken cancellationToken = default);
+
     string GetPullRequestUrl(PullRequest pullRequest);
 
     string GetBuildUrl(Build build);

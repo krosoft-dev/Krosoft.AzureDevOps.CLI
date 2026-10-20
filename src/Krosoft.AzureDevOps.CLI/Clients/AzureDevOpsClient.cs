@@ -163,6 +163,47 @@ internal sealed class AzureDevOpsClient : IAzureDevOpsClient
         return page?.Value ?? [];
     }
 
+    public async Task<IReadOnlyList<GitRepository>> GetRepositoriesAsync(string project, CancellationToken cancellationToken = default)
+    {
+        var url = $"{_organizationUrl}/{Uri.EscapeDataString(project)}/_apis/git/repositories?api-version={ApiVersion}";
+
+        using var response = await _httpClient.GetAsync(url, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+
+        var page = await response.Content.ReadFromJsonAsync<ListResponse<GitRepository>>(JsonOptions, cancellationToken);
+        return page?.Value ?? [];
+    }
+
+    public async Task<IReadOnlyList<PolicyConfiguration>> GetPolicyConfigurationsAsync(string project, CancellationToken cancellationToken = default)
+    {
+        var result = new List<PolicyConfiguration>();
+        string? continuationToken = null;
+
+        do
+        {
+            var url = $"{_organizationUrl}/{Uri.EscapeDataString(project)}/_apis/policy/configurations?$top={PageSize}&api-version={ApiVersion}";
+            if (continuationToken is not null)
+            {
+                url += $"&continuationToken={Uri.EscapeDataString(continuationToken)}";
+            }
+
+            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            await EnsureSuccessAsync(response, cancellationToken);
+
+            var page = await response.Content.ReadFromJsonAsync<ListResponse<PolicyConfiguration>>(JsonOptions, cancellationToken);
+            if (page is not null)
+            {
+                result.AddRange(page.Value);
+            }
+
+            continuationToken = response.Headers.TryGetValues(ContinuationTokenHeader, out var values)
+                ? values.FirstOrDefault()
+                : null;
+        } while (!string.IsNullOrEmpty(continuationToken));
+
+        return result;
+    }
+
     public string GetBuildUrl(Build build) =>
         $"{_organizationUrl}/{Uri.EscapeDataString(build.Project.Name)}/_build/results?buildId={build.Id}";
 

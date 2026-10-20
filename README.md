@@ -55,6 +55,14 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 | `pr-approve` | Approuve les PR (les PR déjà approuvées sont ignorées). `--complete` active en plus l'auto-complétion. |
 | `pr-requeue` | Relance les builds en échec (équivalent du bouton *Re-queue*). Les autres policies en échec sont affichées mais pas relançables. |
 | `build-list` | Liste les builds en cours et en attente sur les projets du profil (les filtres `pullRequests` ne s'appliquent pas). |
+| `policy-list` | Liste les branch policies des projets du profil : dépôt (ou tout le projet), branche, type, mode *Required*/*Optional*. Lecture seule. |
+
+`policy-list` accepte :
+
+| Option | Description |
+|--------|-------------|
+| `--type`, `-t` | Filtre sur le type de policy (contenant, insensible à la casse), ex : `--type "Work item"`. |
+| `--repository`, `-r` | Filtre sur un dépôt. Les policies portant sur tout le projet restent affichées. |
 
 `pr-approve` et `pr-requeue` acceptent :
 
@@ -78,6 +86,7 @@ krosoft-devops pr-approve --profile ./files/tenor.json
 krosoft-devops pr-approve --profile ./files/tenor.json --complete
 krosoft-devops pr-requeue --profile ./files/tenor.json --ids 6562
 krosoft-devops build-list --profile ./files/tenor.json
+krosoft-devops policy-list --profile ./files/tenor.json --type "Work item"
 ```
 
 Depuis les sources (le `--` sépare les arguments de `dotnet run` de ceux du CLI) :
@@ -88,6 +97,7 @@ dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files/tenor.json
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-requeue --profile ./files/tenor.json --ids 6562
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- build-list --profile ./files/tenor.json
+dotnet run --project src/Krosoft.AzureDevOps.CLI -- policy-list --profile ./files/tenor.json --type "Work item"
 ```
 
 Code de sortie : `0` si tout s'est bien passé, `-1` en cas d'erreur ou si au moins une action a échoué.

@@ -6,4 +6,6 @@ internal record PolicySettings(
     [property: JsonPropertyName("displayName")]
     string? DisplayName,
     [property: JsonPropertyName("buildDefinitionId")]
-    int? BuildDefinitionId);
+    int? BuildDefinitionId,
+    [property: JsonPropertyName("scope")]
+    List<PolicyScope>? Scope = null);

@@ -34,6 +34,19 @@ internal static class Options
         public string Profile { get; set; } = string.Empty;
     }
 
+    [Verb("policy-list", HelpText = "Liste les branch policies des projets du profil (lecture seule).")]
+    internal class PolicyListOptions
+    {
+        [Option('p', "profile", Required = true, HelpText = "Chemin vers le fichier de profil JSON.")]
+        public string Profile { get; set; } = string.Empty;
+
+        [Option('t', "type", Required = false, HelpText = "Filtre sur le type de policy, contenant et insensible à la casse (ex: --type \"Work item\").")]
+        public string? Type { get; set; }
+
+        [Option('r', "repository", Required = false, HelpText = "Filtre sur le nom du dépôt. Les policies portant sur tout le projet sont toujours affichées.")]
+        public string? Repository { get; set; }
+    }
+
     [Verb("pr-requeue", HelpText = "Relance les builds en échec (policies Build) des pull requests correspondant aux filtres du profil.")]
     internal class RequeueOptions
     {

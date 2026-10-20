@@ -12,12 +12,13 @@ internal static class Program
             settings.HelpWriter = Console.Error;
             settings.CaseInsensitiveEnumValues = true;
         });
-        return await parser.ParseArguments<Options.PullRequestsOptions, Options.ApproveOptions, Options.RequeueOptions, Options.BuildListOptions>(args)
+        return await parser.ParseArguments<Options.PullRequestsOptions, Options.ApproveOptions, Options.RequeueOptions, Options.BuildListOptions, Options.PolicyListOptions>(args)
                            .MapResult(
                                       (Options.PullRequestsOptions opts) => ProgramPullRequests.List(opts),
                                       (Options.ApproveOptions opts) => ProgramPullRequests.Approve(opts),
                                       (Options.RequeueOptions opts) => ProgramPullRequests.Requeue(opts),
                                       (Options.BuildListOptions opts) => ProgramBuilds.List(opts),
+                                      (Options.PolicyListOptions opts) => ProgramPolicies.List(opts),
                                       _ => Task.FromResult(-1));
     }
 
