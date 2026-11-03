@@ -34,6 +34,13 @@ internal static class Options
         public string Profile { get; set; } = string.Empty;
     }
 
+    [Verb("approval-list", HelpText = "Liste les builds bloqués par une validation manuelle (Approvals) sur les projets du profil.")]
+    internal class ApprovalListOptions
+    {
+        [Option('p', "profile", Required = true, HelpText = "Chemin vers le fichier de profil JSON.")]
+        public string Profile { get; set; } = string.Empty;
+    }
+
     [Verb("policy-list", HelpText = "Liste les branch policies des projets du profil (lecture seule).")]
     internal class PolicyListOptions
     {

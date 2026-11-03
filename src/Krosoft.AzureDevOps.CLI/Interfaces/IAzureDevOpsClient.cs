@@ -24,7 +24,11 @@ internal interface IAzureDevOpsClient : IDisposable
 
     Task<IReadOnlyList<PolicyConfiguration>> GetPolicyConfigurationsAsync(string project, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Approval>> GetPendingApprovalsAsync(string project, CancellationToken cancellationToken = default);
+
     string GetPullRequestUrl(PullRequest pullRequest);
 
     string GetBuildUrl(Build build);
+
+    string GetBuildUrl(string project, int buildId);
 }

@@ -11,6 +11,7 @@ internal sealed class AzureDevOpsClient : IAzureDevOpsClient
 {
     private const string ApiVersion = "7.1";
     private const string PolicyApiVersion = "7.1-preview.1"; // L'API policy evaluations n'existe qu'en preview.
+    private const string ApprovalApiVersion = "7.1-preview.1"; // L'API approvals (Approvals and Checks) n'existe qu'en preview.
     private const int PageSize = 100;
     private const string ContinuationTokenHeader = "x-ms-continuationtoken";
 
@@ -204,8 +205,44 @@ internal sealed class AzureDevOpsClient : IAzureDevOpsClient
         return result;
     }
 
-    public string GetBuildUrl(Build build) =>
-        $"{_organizationUrl}/{Uri.EscapeDataString(build.Project.Name)}/_build/results?buildId={build.Id}";
+    /// <summary>
+    /// Validations manuelles en attente (check "Approvals" des environnements et ressources des pipelines YAML).
+    /// </summary>
+    public async Task<IReadOnlyList<Approval>> GetPendingApprovalsAsync(string project, CancellationToken cancellationToken = default)
+    {
+        var result = new List<Approval>();
+        string? continuationToken = null;
+
+        do
+        {
+            var url = $"{_organizationUrl}/{Uri.EscapeDataString(project)}/_apis/pipelines/approvals" +
+                      $"?state=pending&$expand=steps&$top={PageSize}&api-version={ApprovalApiVersion}";
+            if (continuationToken is not null)
+            {
+                url += $"&continuationToken={Uri.EscapeDataString(continuationToken)}";
+            }
+
+            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            await EnsureSuccessAsync(response, cancellationToken);
+
+            var page = await response.Content.ReadFromJsonAsync<ListResponse<Approval>>(JsonOptions, cancellationToken);
+            if (page is not null)
+            {
+                result.AddRange(page.Value);
+            }
+
+            continuationToken = response.Headers.TryGetValues(ContinuationTokenHeader, out var values)
+                ? values.FirstOrDefault()
+                : null;
+        } while (!string.IsNullOrEmpty(continuationToken));
+
+        return result;
+    }
+
+    public string GetBuildUrl(Build build) => GetBuildUrl(build.Project.Name, build.Id);
+
+    public string GetBuildUrl(string project, int buildId) =>
+        $"{_organizationUrl}/{Uri.EscapeDataString(project)}/_build/results?buildId={buildId}";
 
     public string GetPullRequestUrl(PullRequest pullRequest) =>
         $"{_organizationUrl}/{Uri.EscapeDataString(pullRequest.Repository.Project.Name)}/_git/{Uri.EscapeDataString(pullRequest.Repository.Name)}/pullrequest/{pullRequest.Id}";

@@ -55,6 +55,7 @@ Toutes les commandes prennent `--profile <fichier.json>`. Le profil cible une or
 | `pr-approve` | Approuve les PR (les PR déjà approuvées sont ignorées). `--complete` active en plus l'auto-complétion. |
 | `pr-requeue` | Relance les builds en échec (équivalent du bouton *Re-queue*). Les autres policies en échec sont affichées mais pas relançables. |
 | `build-list` | Liste les builds en cours et en attente sur les projets du profil (les filtres `pullRequests` ne s'appliquent pas). |
+| `approval-list` | Liste les builds bloqués par une validation manuelle (check *Approvals* d'un environnement ou d'une ressource) : pipeline, branche, approbateurs attendus, lien. Les autres checks (heures ouvrées, verrou exclusif...) ne sont pas listés. Lecture seule. |
 | `policy-list` | Liste les branch policies des projets du profil : dépôt (ou tout le projet), branche, type, mode *Required*/*Optional*. Lecture seule. |
 
 `policy-list` accepte :
@@ -86,6 +87,7 @@ krosoft-devops pr-approve --profile ./files/tenor.json
 krosoft-devops pr-approve --profile ./files/tenor.json --complete
 krosoft-devops pr-requeue --profile ./files/tenor.json --ids 6562
 krosoft-devops build-list --profile ./files/tenor.json
+krosoft-devops approval-list --profile ./files/tenor.json
 krosoft-devops policy-list --profile ./files/tenor.json --type "Work item"
 ```
 
@@ -97,6 +99,7 @@ dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-approve --profile ./files/tenor.json
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- pr-requeue --profile ./files/tenor.json --ids 6562
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- build-list --profile ./files/tenor.json
+dotnet run --project src/Krosoft.AzureDevOps.CLI -- approval-list --profile ./files/tenor.json
 dotnet run --project src/Krosoft.AzureDevOps.CLI -- policy-list --profile ./files/tenor.json --type "Work item"
 ```
 
